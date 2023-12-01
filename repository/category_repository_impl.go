@@ -2,10 +2,11 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-	"programmerzamannow/belajar-golang-restful-api/helper"
-	"programmerzamannow/belajar-golang-restful-api/model/domain"
+	"mfahmii/golang-restful/helper"
+	"mfahmii/golang-restful/model/domain"
+
+	"gorm.io/gorm"
 )
 
 type CategoryRepositoryImpl struct {
@@ -15,19 +16,20 @@ func NewCategoryRepository() CategoryRepository {
 	return &CategoryRepositoryImpl{}
 }
 
-func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category {
-	SQL := "insert into category(name) values (?)"
-	result, err := tx.ExecContext(ctx, SQL, category.Name)
-	helper.PanicIfError(err)
+func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *gorm.DB, category domain.Category) domain.Category {
+	// SQL := "insert into category(name) values (?)"
+	// result, err := tx.ExecContext(ctx, SQL, category.Name)
+	response := tx.Create(&category)
+	helper.PanicIfError(response.Error)
 
-	id, err := result.LastInsertId()
-	helper.PanicIfError(err)
+	// id, err := result.LastInsertId()
+	// helper.PanicIfError(err)
 
-	category.Id = int(id)
+	// category.Id = int(id)
 	return category
 }
 
-func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category {
+func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *gorm.DB, category domain.Category) domain.Category {
 	SQL := "update category set name = ? where id = ?"
 	_, err := tx.ExecContext(ctx, SQL, category.Name, category.Id)
 	helper.PanicIfError(err)
@@ -35,13 +37,13 @@ func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx
 	return category
 }
 
-func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, category domain.Category) {
+func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *gorm.DB, category domain.Category) {
 	SQL := "delete from category where id = ?"
 	_, err := tx.ExecContext(ctx, SQL, category.Id)
 	helper.PanicIfError(err)
 }
 
-func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, categoryId int) (domain.Category, error) {
+func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *gorm.DB, categoryId int) (domain.Category, error) {
 	SQL := "select id, name from category where id = ?"
 	rows, err := tx.QueryContext(ctx, SQL, categoryId)
 	helper.PanicIfError(err)
@@ -57,7 +59,7 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.
 	}
 }
 
-func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Category {
+func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *gorm.DB) []domain.Category {
 	SQL := "select id, name from category"
 	rows, err := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(err)

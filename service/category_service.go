@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"programmerzamannow/belajar-golang-restful-api/model/web"
+	"mfahmii/golang-restful/model/web"
 )
 
 type CategoryService interface {

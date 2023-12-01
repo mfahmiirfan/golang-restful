@@ -2,22 +2,23 @@ package service
 
 import (
 	"context"
-	"database/sql"
+	"mfahmii/golang-restful/exception"
+	"mfahmii/golang-restful/helper"
+	"mfahmii/golang-restful/model/domain"
+	"mfahmii/golang-restful/model/web"
+	"mfahmii/golang-restful/repository"
+
 	"github.com/go-playground/validator/v10"
-	"programmerzamannow/belajar-golang-restful-api/exception"
-	"programmerzamannow/belajar-golang-restful-api/helper"
-	"programmerzamannow/belajar-golang-restful-api/model/domain"
-	"programmerzamannow/belajar-golang-restful-api/model/web"
-	"programmerzamannow/belajar-golang-restful-api/repository"
+	"gorm.io/gorm"
 )
 
 type CategoryServiceImpl struct {
 	CategoryRepository repository.CategoryRepository
-	DB                 *sql.DB
+	DB                 *gorm.DB
 	Validate           *validator.Validate
 }
 
-func NewCategoryService(categoryRepository repository.CategoryRepository, DB *sql.DB, validate *validator.Validate) CategoryService {
+func NewCategoryService(categoryRepository repository.CategoryRepository, DB *gorm.DB, validate *validator.Validate) CategoryService {
 	return &CategoryServiceImpl{
 		CategoryRepository: categoryRepository,
 		DB:                 DB,
@@ -29,8 +30,8 @@ func (service *CategoryServiceImpl) Create(ctx context.Context, request web.Cate
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
+	tx := service.DB.Begin()
+	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
 
 	category := domain.Category{
@@ -46,8 +47,8 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request web.Cate
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
+	tx := service.DB.Begin()
+	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
 
 	category, err := service.CategoryRepository.FindById(ctx, tx, request.Id)
@@ -63,8 +64,8 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request web.Cate
 }
 
 func (service *CategoryServiceImpl) Delete(ctx context.Context, categoryId int) {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
+	tx := service.DB.Begin()
+	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
 
 	category, err := service.CategoryRepository.FindById(ctx, tx, categoryId)
@@ -76,8 +77,8 @@ func (service *CategoryServiceImpl) Delete(ctx context.Context, categoryId int) 
 }
 
 func (service *CategoryServiceImpl) FindById(ctx context.Context, categoryId int) web.CategoryResponse {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
+	tx := service.DB.Begin()
+	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
 
 	category, err := service.CategoryRepository.FindById(ctx, tx, categoryId)
@@ -89,8 +90,8 @@ func (service *CategoryServiceImpl) FindById(ctx context.Context, categoryId int
 }
 
 func (service *CategoryServiceImpl) FindAll(ctx context.Context) []web.CategoryResponse {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
+	tx := service.DB.Begin()
+	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
 
 	categories := service.CategoryRepository.FindAll(ctx, tx)

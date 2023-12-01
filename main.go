@@ -1,20 +1,22 @@
 package main
 
 import (
+	"mfahmii/golang-restful/app"
+	"mfahmii/golang-restful/controller"
+	"mfahmii/golang-restful/helper"
+	"mfahmii/golang-restful/middleware"
+	"mfahmii/golang-restful/repository"
+	"mfahmii/golang-restful/service"
+	"net/http"
+
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
-	"net/http"
-	"programmerzamannow/belajar-golang-restful-api/app"
-	"programmerzamannow/belajar-golang-restful-api/controller"
-	"programmerzamannow/belajar-golang-restful-api/helper"
-	"programmerzamannow/belajar-golang-restful-api/middleware"
-	"programmerzamannow/belajar-golang-restful-api/repository"
-	"programmerzamannow/belajar-golang-restful-api/service"
 )
 
 func main() {
 
-	db := app.NewDB()
+	// db := app.NewDB()
+	db := app.OpenConnection()
 	validate := validator.New()
 	categoryRepository := repository.NewCategoryRepository()
 	categoryService := service.NewCategoryService(categoryRepository, db, validate)

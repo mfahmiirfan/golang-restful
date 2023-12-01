@@ -5,26 +5,28 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/stretchr/testify/assert"
 	"io"
+	"mfahmii/golang-restful/app"
+	"mfahmii/golang-restful/controller"
+	"mfahmii/golang-restful/helper"
+	"mfahmii/golang-restful/middleware"
+	"mfahmii/golang-restful/model/domain"
+	"mfahmii/golang-restful/repository"
+	"mfahmii/golang-restful/service"
 	"net/http"
 	"net/http/httptest"
-	"programmerzamannow/belajar-golang-restful-api/app"
-	"programmerzamannow/belajar-golang-restful-api/controller"
-	"programmerzamannow/belajar-golang-restful-api/helper"
-	"programmerzamannow/belajar-golang-restful-api/middleware"
-	"programmerzamannow/belajar-golang-restful-api/model/domain"
-	"programmerzamannow/belajar-golang-restful-api/repository"
-	"programmerzamannow/belajar-golang-restful-api/service"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-playground/validator/v10"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
-func setupTestDB() *sql.DB {
+func setupTestDB() *gorm.DB {
 	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/belajar_golang_restful_api_test")
 	helper.PanicIfError(err)
 
@@ -36,7 +38,7 @@ func setupTestDB() *sql.DB {
 	return db
 }
 
-func setupRouter(db *sql.DB) http.Handler {
+func setupRouter(db *gorm.DB) http.Handler {
 	validate := validator.New()
 	categoryRepository := repository.NewCategoryRepository()
 	categoryService := service.NewCategoryService(categoryRepository, db, validate)
@@ -46,7 +48,7 @@ func setupRouter(db *sql.DB) http.Handler {
 	return middleware.NewAuthMiddleware(router)
 }
 
-func truncateCategory(db *sql.DB) {
+func truncateCategory(db *gorm.DB) {
 	db.Exec("TRUNCATE category")
 }
 
