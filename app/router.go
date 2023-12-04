@@ -4,19 +4,21 @@ import (
 	"mfahmii/golang-restful/controller"
 	"mfahmii/golang-restful/exception"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/gofiber/fiber/v2"
 )
 
-func NewRouter(categoryController controller.CategoryController) *httprouter.Router {
-	router := httprouter.New()
+func NewRouter(categoryController controller.CategoryController) *fiber.App {
+	// router := httprouter.New()
+	router := fiber.New()
 
-	router.GET("/api/categories", categoryController.FindAll)
-	router.GET("/api/categories/:categoryId", categoryController.FindById)
-	router.POST("/api/categories", categoryController.Create)
-	router.PUT("/api/categories/:categoryId", categoryController.Update)
-	router.DELETE("/api/categories/:categoryId", categoryController.Delete)
+	router.Get("/api/categories", categoryController.FindAll)
+	router.Get("/api/categories/:categoryId", categoryController.FindById)
+	router.Post("/api/categories", categoryController.Create)
+	router.Put("/api/categories/:categoryId", categoryController.Update)
+	router.Delete("/api/categories/:categoryId", categoryController.Delete)
 
-	router.PanicHandler = exception.ErrorHandler
+	// router.PanicHandler = exception.ErrorHandler
+	router.Use(exception.ErrorHandler)
 
 	return router
 }

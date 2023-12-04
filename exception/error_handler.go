@@ -3,71 +3,87 @@ package exception
 import (
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/web"
-	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
-func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interface{}) {
+// func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interface{}) {
 
-	if notFoundError(writer, request, err) {
-		return
+// 	if notFoundError(writer, request, err) {
+// 		return
+// 	}
+
+// 	if validationErrors(writer, request, err) {
+// 		return
+// 	}
+
+//		internalServerError(writer, request, err)
+//	}
+func ErrorHandler(ctx *fiber.Ctx) error {
+	if err := ctx.Next(); err != nil {
+		// Handle the error here
+		if notFoundError(ctx, err) {
+			return err
+		}
+
+		if validationErrors(ctx, err) {
+			return err
+		}
+
+		internalServerError(ctx, err)
+		return err
 	}
-
-	if validationErrors(writer, request, err) {
-		return
-	}
-
-	internalServerError(writer, request, err)
+	return nil
 }
 
-func validationErrors(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
+func validationErrors(ctx *fiber.Ctx, err interface{}) bool {
 	exception, ok := err.(validator.ValidationErrors)
 	if ok {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
+		// ctx.Set("Content-Type", "application/json")
+		ctx.Status(fiber.StatusBadRequest)
 
 		webResponse := web.WebResponse{
-			Code:   http.StatusBadRequest,
+			Code:   fiber.StatusBadRequest,
 			Status: "BAD REQUEST",
 			Data:   exception.Error(),
 		}
 
-		helper.WriteToResponseBody(writer, webResponse)
+		helper.WriteToResponseBody(ctx, webResponse)
 		return true
 	} else {
 		return false
 	}
 }
 
-func notFoundError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
+func notFoundError(ctx *fiber.Ctx, err interface{}) bool {
 	exception, ok := err.(NotFoundError)
 	if ok {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusNotFound)
+		// ctx.Set("Content-Type", "application/json")
+		ctx.Status(fiber.StatusNotFound)
 
 		webResponse := web.WebResponse{
-			Code:   http.StatusNotFound,
+			Code:   fiber.StatusNotFound,
 			Status: "NOT FOUND",
 			Data:   exception.Error,
 		}
 
-		helper.WriteToResponseBody(writer, webResponse)
+		helper.WriteToResponseBody(ctx, webResponse)
 		return true
 	} else {
 		return false
 	}
 }
 
-func internalServerError(writer http.ResponseWriter, request *http.Request, err interface{}) {
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusInternalServerError)
+func internalServerError(ctx *fiber.Ctx, err interface{}) {
+	// ctx.Set("Content-Type", "application/json")
+	ctx.Status(fiber.StatusInternalServerError)
 
 	webResponse := web.WebResponse{
-		Code:   http.StatusInternalServerError,
+		Code:   fiber.StatusInternalServerError,
 		Status: "INTERNAL SERVER ERROR",
 		Data:   err,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse)
+	helper.WriteToResponseBody(ctx, webResponse)
 }

@@ -4,10 +4,9 @@ import (
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/web"
 	"mfahmii/golang-restful/service"
-	"net/http"
 	"strconv"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/gofiber/fiber/v2"
 )
 
 type CategoryControllerImpl struct {
@@ -20,76 +19,76 @@ func NewCategoryController(categoryService service.CategoryService) CategoryCont
 	}
 }
 
-func (controller *CategoryControllerImpl) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *CategoryControllerImpl) Create(ctx *fiber.Ctx) error {
 	categoryCreateRequest := web.CategoryCreateRequest{}
-	helper.ReadFromRequestBody(request, &categoryCreateRequest)
+	helper.ReadFromRequestBody(ctx, &categoryCreateRequest)
 
-	categoryResponse := controller.CategoryService.Create(request.Context(), categoryCreateRequest)
+	categoryResponse := controller.CategoryService.Create(ctx.Context(), categoryCreateRequest)
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
 		Data:   categoryResponse,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse)
+	return helper.WriteToResponseBody(ctx, webResponse)
 }
 
-func (controller *CategoryControllerImpl) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *CategoryControllerImpl) Update(ctx *fiber.Ctx) error {
 	categoryUpdateRequest := web.CategoryUpdateRequest{}
-	helper.ReadFromRequestBody(request, &categoryUpdateRequest)
+	helper.ReadFromRequestBody(ctx, &categoryUpdateRequest)
 
-	categoryId := params.ByName("categoryId")
+	categoryId := ctx.Params("categoryId")
 	id, err := strconv.Atoi(categoryId)
 	helper.PanicIfError(err)
 
 	categoryUpdateRequest.Id = id
 
-	categoryResponse := controller.CategoryService.Update(request.Context(), categoryUpdateRequest)
+	categoryResponse := controller.CategoryService.Update(ctx.Context(), categoryUpdateRequest)
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
 		Data:   categoryResponse,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse)
+	return helper.WriteToResponseBody(ctx, webResponse)
 }
 
-func (controller *CategoryControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	categoryId := params.ByName("categoryId")
+func (controller *CategoryControllerImpl) Delete(ctx *fiber.Ctx) error {
+	categoryId := ctx.Params("categoryId")
 	id, err := strconv.Atoi(categoryId)
 	helper.PanicIfError(err)
 
-	controller.CategoryService.Delete(request.Context(), id)
+	controller.CategoryService.Delete(ctx.Context(), id)
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
 	}
 
-	helper.WriteToResponseBody(writer, webResponse)
+	return helper.WriteToResponseBody(ctx, webResponse)
 }
 
-func (controller *CategoryControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	categoryId := params.ByName("categoryId")
+func (controller *CategoryControllerImpl) FindById(ctx *fiber.Ctx) error {
+	categoryId := ctx.Params("categoryId")
 	id, err := strconv.Atoi(categoryId)
 	helper.PanicIfError(err)
 
-	categoryResponse := controller.CategoryService.FindById(request.Context(), id)
+	categoryResponse := controller.CategoryService.FindById(ctx.Context(), id)
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
 		Data:   categoryResponse,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse)
+	return helper.WriteToResponseBody(ctx, webResponse)
 }
 
-func (controller *CategoryControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	categoryResponses := controller.CategoryService.FindAll(request.Context())
+func (controller *CategoryControllerImpl) FindAll(ctx *fiber.Ctx) error {
+	categoryResponses := controller.CategoryService.FindAll(ctx.Context())
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
 		Data:   categoryResponses,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse)
+	return helper.WriteToResponseBody(ctx, webResponse)
 }
