@@ -20,7 +20,7 @@ func NewCategoryRepository() CategoryRepository {
 func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *gorm.DB, category domain.Category) domain.Category {
 	// SQL := "insert into category(name) values (?)"
 	// result, err := tx.ExecContext(ctx, SQL, category.Name)
-	response := tx.Create(&category)
+	response := tx.WithContext(ctx).Create(&category)
 	helper.PanicIfError(response.Error)
 
 	// id, err := result.LastInsertId()
@@ -34,7 +34,7 @@ func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *gorm.DB,
 func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *gorm.DB, category domain.Category) domain.Category {
 	// SQL := "update category set name = ? where id = ?"
 	// _, err := tx.ExecContext(ctx, SQL, category.Name, category.Id)
-	err := tx.Save(&category).Error
+	err := tx.WithContext(ctx).Save(&category).Error
 	helper.PanicIfError(err)
 
 	return category
@@ -43,7 +43,7 @@ func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *gorm.D
 func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *gorm.DB, category domain.Category) {
 	// SQL := "delete from category where id = ?"
 	// _, err := tx.ExecContext(ctx, SQL, category.Id)
-	err := tx.Delete(&category).Error
+	err := tx.WithContext(ctx).Delete(&category).Error
 	helper.PanicIfError(err)
 }
 
@@ -51,7 +51,7 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *gorm
 	// SQL := "select id, name from category where id = ?"
 	// rows, err := tx.QueryContext(ctx, SQL, categoryId)
 	var category domain.Category
-	err := tx.First(&category, categoryId).Error
+	err := tx.WithContext(ctx).First(&category, categoryId).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return category, errors.New("category is not found")
@@ -75,7 +75,7 @@ func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *gorm.
 	// SQL := "select id, name from category"
 	// rows, err := tx.QueryContext(ctx, SQL)
 	var categories []domain.Category
-	err := tx.Find(&categories).Error
+	err := tx.WithContext(ctx).Find(&categories).Error
 	helper.PanicIfError(err)
 	// defer rows.Close()
 

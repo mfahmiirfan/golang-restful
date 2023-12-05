@@ -9,7 +9,6 @@ import (
 	"mfahmii/golang-restful/repository"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -64,7 +63,7 @@ func (service *UserServiceImpl) Update(ctx context.Context, request web.UserUpda
 	return helper.ToUserResponse(user)
 }
 
-func (service *UserServiceImpl) Delete(ctx context.Context, userId uuid.UUID) {
+func (service *UserServiceImpl) Delete(ctx context.Context, userId int) {
 	tx := service.DB.Begin()
 	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
@@ -77,12 +76,25 @@ func (service *UserServiceImpl) Delete(ctx context.Context, userId uuid.UUID) {
 	service.UserRepository.Delete(ctx, tx, user)
 }
 
-func (service *UserServiceImpl) FindById(ctx context.Context, userId uuid.UUID) web.UserResponse {
+func (service *UserServiceImpl) FindById(ctx context.Context, userId int) web.UserResponse {
 	tx := service.DB.Begin()
 	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
 
 	user, err := service.UserRepository.FindById(ctx, tx, userId)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	return helper.ToUserResponse(user)
+}
+
+func (service *UserServiceImpl) FindByEmail(ctx context.Context, email string) web.UserResponse {
+	tx := service.DB.Begin()
+	helper.PanicIfError(tx.Error)
+	defer helper.CommitOrRollback(tx)
+
+	user, err := service.UserRepository.FindByEmail(ctx, tx, email)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}

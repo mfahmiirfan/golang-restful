@@ -4,6 +4,7 @@ import (
 	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/controller"
 	"mfahmii/golang-restful/helper"
+	"mfahmii/golang-restful/model/domain"
 	"mfahmii/golang-restful/repository"
 	"mfahmii/golang-restful/service"
 
@@ -15,11 +16,16 @@ func main() {
 
 	// db := app.NewDB()
 	db := app.OpenConnection()
+	db.AutoMigrate(&domain.User{})
 	validate := validator.New()
 	categoryRepository := repository.NewCategoryRepository()
 	categoryService := service.NewCategoryService(categoryRepository, db, validate)
 	categoryController := controller.NewCategoryController(categoryService)
-	router := app.NewRouter(categoryController)
+
+	userRepository := repository.NewUserRepository()
+	userService := service.NewUserService(userRepository, db, validate)
+	authController := controller.NewAuthController(userService)
+	router := app.NewRouter(categoryController, authController)
 
 	// server := http.Server{
 	// 	Addr:    "localhost:3000",
