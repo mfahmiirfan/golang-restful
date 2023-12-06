@@ -11,6 +11,8 @@ func NewRouter(categoryController controller.CategoryController, authController 
 	// router := httprouter.New()
 	router := fiber.New()
 
+	router.Use(exception.ErrorHandler)
+
 	router.Get("/api/categories", categoryController.FindAll)
 	router.Get("/api/categories/:categoryId", categoryController.FindById)
 	router.Post("/api/categories", categoryController.Create)
@@ -21,7 +23,6 @@ func NewRouter(categoryController controller.CategoryController, authController 
 	router.Post("/api/auth/logout", authController.Logout)
 
 	// router.PanicHandler = exception.ErrorHandler
-	router.Use(exception.ErrorHandler)
 
 	return router
 }

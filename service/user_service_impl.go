@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"mfahmii/golang-restful/exception"
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/domain"
@@ -90,6 +91,7 @@ func (service *UserServiceImpl) FindById(ctx context.Context, userId int) web.Us
 }
 
 func (service *UserServiceImpl) FindByEmail(ctx context.Context, email string) web.UserResponse {
+	fmt.Println("test")
 	tx := service.DB.Begin()
 	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)

@@ -21,20 +21,27 @@ import (
 //		internalServerError(writer, request, err)
 //	}
 func ErrorHandler(ctx *fiber.Ctx) error {
-	if err := ctx.Next(); err != nil {
-		// Handle the error here
-		if notFoundError(ctx, err) {
-			return err
-		}
+	defer func() {
+		if r := recover(); r != nil {
+			// if err := ctx.Next(); err != nil {
+			// Handle the error here
+			if notFoundError(ctx, r) {
+				return
+			}
 
-		if validationErrors(ctx, err) {
-			return err
-		}
+			if validationErrors(ctx, r) {
+				return
+			}
 
-		internalServerError(ctx, err)
-		return err
-	}
-	return nil
+			if loginError(ctx, r) {
+				return
+			}
+
+			internalServerError(ctx, r)
+			// }
+		}
+	}()
+	return ctx.Next()
 }
 
 func validationErrors(ctx *fiber.Ctx, err interface{}) bool {
@@ -43,10 +50,10 @@ func validationErrors(ctx *fiber.Ctx, err interface{}) bool {
 		// ctx.Set("Content-Type", "application/json")
 		ctx.Status(fiber.StatusBadRequest)
 
-		webResponse := web.WebResponse{
+		webResponse := web.WebResponseError{
 			Code:   fiber.StatusBadRequest,
 			Status: "BAD REQUEST",
-			Data:   exception.Error(),
+			Errors: exception.Error(),
 		}
 
 		helper.WriteToResponseBody(ctx, webResponse)
@@ -62,10 +69,10 @@ func notFoundError(ctx *fiber.Ctx, err interface{}) bool {
 		// ctx.Set("Content-Type", "application/json")
 		ctx.Status(fiber.StatusNotFound)
 
-		webResponse := web.WebResponse{
+		webResponse := web.WebResponseError{
 			Code:   fiber.StatusNotFound,
 			Status: "NOT FOUND",
-			Data:   exception.Error,
+			Errors: exception.Error,
 		}
 
 		helper.WriteToResponseBody(ctx, webResponse)
@@ -77,13 +84,48 @@ func notFoundError(ctx *fiber.Ctx, err interface{}) bool {
 
 func internalServerError(ctx *fiber.Ctx, err interface{}) {
 	// ctx.Set("Content-Type", "application/json")
+	// ctx.Status(fiber.StatusInternalServerError)
+
+	// webResponse := web.WebResponse{
+	// 	Code:   fiber.StatusInternalServerError,
+	// 	Status: "INTERNAL SERVER ERROR",
+	// 	Data:   err,
+	// }
+
+	// helper.WriteToResponseBody(ctx, webResponse)
+	data := func() interface{} {
+		if err, ok := err.(error); ok {
+			return err.Error()
+		}
+		return err
+	}()
+
 	ctx.Status(fiber.StatusInternalServerError)
 
-	webResponse := web.WebResponse{
+	webResponse := web.WebResponseError{
 		Code:   fiber.StatusInternalServerError,
 		Status: "INTERNAL SERVER ERROR",
-		Data:   err,
+		Errors: data,
 	}
 
 	helper.WriteToResponseBody(ctx, webResponse)
+}
+
+func loginError(ctx *fiber.Ctx, err interface{}) bool {
+	exception, ok := err.(LoginError)
+	if ok {
+		// ctx.Set("Content-Type", "application/json")
+		ctx.Status(fiber.StatusUnauthorized)
+
+		webResponse := web.WebResponseError{
+			Code:   fiber.StatusUnauthorized,
+			Status: "UNAUTHORIZED",
+			Errors: exception.Error(),
+		}
+
+		helper.WriteToResponseBody(ctx, webResponse)
+		return true
+	} else {
+		return false
+	}
 }
