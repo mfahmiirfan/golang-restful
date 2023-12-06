@@ -19,38 +19,18 @@ func NewAuthController(authService service.AuthService) AuthController {
 }
 
 func (controller *AuthControllerImpl) SignUp(ctx *fiber.Ctx) error {
-	// userSignUpRequest := web.UserSignUpRequest{}
-	// helper.ReadFromRequestBody(ctx, &userSignUpRequest)
+	userSignUpRequest := web.UserSignUpRequest{}
+	helper.ReadFromRequestBody(ctx, &userSignUpRequest)
 
-	// if userSignUpRequest.Password != userSignUpRequest.PasswordConfirm {
-	// 	return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": "Passwords do not match"})
+	userResponse := controller.AuthService.SignUp(ctx, userSignUpRequest)
 
-	// }
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+		Data:   userResponse,
+	}
 
-	// hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userSignUpRequest.Password), bcrypt.DefaultCost)
-	// helper.PanicIfError(err)
-
-	// // if err != nil {
-	// // 	return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": err.Error()})
-	// // }
-	// newUser := web.UserCreateRequest{
-	// 	Name:     userSignUpRequest.Name,
-	// 	Email:    strings.ToLower(userSignUpRequest.Email),
-	// 	Password: string(hashedPassword),
-	// 	// Photo:    &payload.Photo,
-	// }
-
-	// userResponse := controller.AuthService.Create(ctx.Context(), newUser)
-
-	// // categoryResponse := controller.AuthService.Create(ctx.Context(), userSignUpRequest)
-	// webResponse := web.WebResponse{
-	// 	Code:   200,
-	// 	Status: "OK",
-	// 	Data:   userResponse,
-	// }
-
-	// return helper.WriteToResponseBody(ctx, webResponse)
-	return nil
+	return helper.WriteToResponseBody(ctx, webResponse)
 }
 
 func (controller *AuthControllerImpl) SignIn(ctx *fiber.Ctx) (err error) {

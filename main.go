@@ -17,7 +17,7 @@ func main() {
 	config, err := config.LoadConfig("./config")
 	helper.PanicIfError(err)
 	// db := app.NewDB()
-	db := app.OpenConnection()
+	db := app.OpenConnection(&config)
 	db.AutoMigrate(&domain.User{})
 	validate := validator.New()
 	categoryRepository := repository.NewCategoryRepository()

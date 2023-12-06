@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"mfahmii/golang-restful/config"
 	"mfahmii/golang-restful/exception"
 	"mfahmii/golang-restful/helper"
@@ -74,5 +75,25 @@ func (service *AuthServiceImpl) SignIn(ctx *fiber.Ctx, request web.UserSignInReq
 
 	return web.TokenResponse{
 		Token: tokenString,
+	}
+}
+
+func (service *AuthServiceImpl) SignUp(ctx *fiber.Ctx, request web.UserSignUpRequest) web.UserResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
+	tx := service.DB.Begin()
+	helper.PanicIfError(tx.Error)
+	defer helper.CommitOrRollback(tx)
+
+	if request.Password != request.PasswordConfirm {
+		validationErrs := validator.ValidationErrors{}
+
+		// Simulate adding custom errors manually
+		validationErrs = append(validationErrs, &validator.FieldError{
+			StructField: "Username",
+			FieldError:  fmt.Errorf("Username is required"),
+			Tag:         "required",
+		})
 	}
 }
