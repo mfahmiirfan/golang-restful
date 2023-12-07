@@ -7,6 +7,6 @@ import (
 )
 
 type AuthService interface {
-	SignUp(ctx *fiber.Ctx, request web.UserSignInRequest) web.UserResponse
-	SignIn(ctx *fiber.Ctx, request web.UserSignUpRequest) web.TokenResponse
+	SignUp(ctx *fiber.Ctx, request web.UserSignUpRequest) web.UserResponse
+	SignIn(ctx *fiber.Ctx, request web.UserSignInRequest) web.TokenResponse
 }

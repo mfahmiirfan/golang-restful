@@ -2,13 +2,14 @@ package service
 
 import (
 	"fmt"
-	"mfahmii/golang-restful/config"
+	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/exception"
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/web"
 	"mfahmii/golang-restful/repository"
 	"time"
 
+	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
@@ -19,17 +20,35 @@ import (
 type AuthServiceImpl struct {
 	UserRepository repository.UserRepository
 	DB             *gorm.DB
-	Validate       *validator.Validate
-	Config         *config.Config
+	Validate       *app.Validation
+	Config         *app.Config
+	Trans          *ut.Translator
 }
 
-func NewAuthService(userRepository repository.UserRepository, DB *gorm.DB, validate *validator.Validate, config *config.Config) AuthService {
+func NewAuthService(userRepository repository.UserRepository, DB *gorm.DB, validate *app.Validation, config *app.Config) AuthService {
 	return &AuthServiceImpl{
 		UserRepository: userRepository,
 		DB:             DB,
 		Validate:       validate,
 		Config:         config,
 	}
+}
+
+func (service *AuthServiceImpl) SignUp(ctx *fiber.Ctx, request web.UserSignUpRequest) web.UserResponse {
+	service.Validate.RegisterValidation("passwordConfirm", func(fl validator.FieldLevel) bool {
+		return fl.Field().String() == request.Password
+	})
+
+	err := service.Validate.Struct(request)
+	errs := service.Validate.TranslateError(err)
+	fmt.Println(errs)
+	helper.PanicIfError(err)
+
+	tx := service.DB.Begin()
+	helper.PanicIfError(tx.Error)
+	defer helper.CommitOrRollback(tx)
+
+	return web.UserResponse{}
 }
 
 func (service *AuthServiceImpl) SignIn(ctx *fiber.Ctx, request web.UserSignInRequest) web.TokenResponse {
@@ -75,25 +94,5 @@ func (service *AuthServiceImpl) SignIn(ctx *fiber.Ctx, request web.UserSignInReq
 
 	return web.TokenResponse{
 		Token: tokenString,
-	}
-}
-
-func (service *AuthServiceImpl) SignUp(ctx *fiber.Ctx, request web.UserSignUpRequest) web.UserResponse {
-	err := service.Validate.Struct(request)
-	helper.PanicIfError(err)
-
-	tx := service.DB.Begin()
-	helper.PanicIfError(tx.Error)
-	defer helper.CommitOrRollback(tx)
-
-	if request.Password != request.PasswordConfirm {
-		validationErrs := validator.ValidationErrors{}
-
-		// Simulate adding custom errors manually
-		validationErrs = append(validationErrs, &validator.FieldError{
-			StructField: "Username",
-			FieldError:  fmt.Errorf("Username is required"),
-			Tag:         "required",
-		})
 	}
 }

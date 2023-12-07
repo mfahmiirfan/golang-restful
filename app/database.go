@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"mfahmii/golang-restful/config"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -22,7 +21,7 @@ import (
 // 	return db
 // }
 
-func OpenConnection(config *config.Config) *gorm.DB {
+func OpenConnection(config *Config) *gorm.DB {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", config.DBUserName, config.DBUserPassword, config.DBHost, config.DBPort, config.DBName)
 
 	dialect := mysql.Open(connectionString)

@@ -2,23 +2,23 @@ package service
 
 import (
 	"context"
+	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/exception"
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/domain"
 	"mfahmii/golang-restful/model/web"
 	"mfahmii/golang-restful/repository"
 
-	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type CategoryServiceImpl struct {
 	CategoryRepository repository.CategoryRepository
 	DB                 *gorm.DB
-	Validate           *validator.Validate
+	Validate           *app.Validation
 }
 
-func NewCategoryService(categoryRepository repository.CategoryRepository, DB *gorm.DB, validate *validator.Validate) CategoryService {
+func NewCategoryService(categoryRepository repository.CategoryRepository, DB *gorm.DB, validate *app.Validation) CategoryService {
 	return &CategoryServiceImpl{
 		CategoryRepository: categoryRepository,
 		DB:                 DB,
