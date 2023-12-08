@@ -1,8 +1,8 @@
 package app
 
 import (
-	"fmt"
-	"reflect"
+	"mfahmii/golang-restful/exception"
+	"strings"
 
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
@@ -29,39 +29,30 @@ func NewValidation() *Validation {
 }
 
 func (validation *Validation) Struct(s interface{}) error {
-	return validation.Validate.Struct(s)
+	return validation.TranslateError(validation.Validate.Struct(s))
 }
 
 func (validation *Validation) RegisterValidation(s string, f func(validator.FieldLevel) bool) {
 	validation.Validate.RegisterValidation(s, f)
 }
 
-func (validation *Validation) TranslateError(err error) validator.ValidationErrors {
+func (validation *Validation) TranslateError(err error) error {
 	if err == nil {
 		return nil
 	}
-	validatorErrs := err.(validator.ValidationErrors)
-	var errs []error
+
+	validatorErrs, ok := err.(validator.ValidationErrors)
+	if !ok {
+		return err // Return the original error if it's not of type ValidationErrors
+	}
+
+	var errMsgs []string
 	for _, e := range validatorErrs {
-		translatedErr := fmt.Errorf(e.Translate(*validation.Translator))
-		errs = append(errs, translatedErr)
+		translatedErr := e.Translate(*validation.Translator)
+		errMsgs = append(errMsgs, translatedErr)
 	}
 
-	var errorStrings []string
-
-	for _, err := range errs {
-		errorStrings = append(errorStrings, err.Error())
-	}
-
-	var validationErrors validator.ValidationErrors
-
-	// Append custom validator.FieldError instances
-	customFieldError := CreateValidationError("field", "tag", "message")
-	fmt.Println(customFieldError)
-	validationErrors = append(validationErrors, new(&customFieldError))
-	fmt.Println(validationErrors)
-
-	return validationErrors
+	return exception.NewValidationError(strings.Join(errMsgs, ";"))
 }
 
 func (validation *Validation) AddTranslation(tag string, errMessage string) {
@@ -81,75 +72,4 @@ func (validation *Validation) AddTranslation(tag string, errMessage string) {
 	}
 
 	_ = validation.Validate.RegisterTranslation(tag, *validation.Translator, registerFn, transFn)
-}
-
-// Custom Field Error
-type CustomValidationError struct {
-	field string
-	tag   string
-	err   string
-}
-
-func CreateValidationError(field, tag, errorMessage string) validator.FieldError {
-	return &CustomValidationError{
-		field: field,
-		tag:   tag,
-		err:   errorMessage,
-	}
-}
-
-// Error returns the error message for CustomValidationError
-func (e *CustomValidationError) Error() string {
-	return fmt.Sprintf("Field '%s' failed validation on tag '%s'", e.field, e.tag)
-}
-
-// Field returns the field name for CustomValidationError
-func (e *CustomValidationError) Field() string {
-	return e.field
-}
-
-// Tag returns the tag for CustomValidationError
-func (e *CustomValidationError) Tag() string {
-	return e.tag
-}
-
-// ActualTag returns the actual tag for CustomValidationError
-func (e *CustomValidationError) ActualTag() string {
-	return e.tag
-}
-
-// Kind returns the kind of data for CustomValidationError
-func (e *CustomValidationError) Kind() reflect.Kind {
-	return reflect.String // Modify this according to your data type
-}
-
-// Param returns the param for CustomValidationError
-func (e *CustomValidationError) Param() string {
-	return "" // Modify this if you have parameter info
-}
-
-// Value returns the value of the field for CustomValidationError
-func (e *CustomValidationError) Value() interface{} {
-	return nil // Modify this to return actual field value
-}
-
-func (e *CustomValidationError) Namespace() string {
-	return ""
-}
-
-func (e *CustomValidationError) StructField() string {
-	return ""
-}
-
-func (e *CustomValidationError) StructNamespace() string {
-	return ""
-}
-
-func (e *CustomValidationError) Translate(ut ut.Translator) string {
-	return ""
-}
-
-func (e *CustomValidationError) Type() reflect.Type {
-	var fieldError validator.FieldError
-	return reflect.TypeOf(fieldError)
 }

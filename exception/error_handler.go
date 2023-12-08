@@ -4,7 +4,6 @@ import (
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/web"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -45,7 +44,7 @@ func ErrorHandler(ctx *fiber.Ctx) error {
 }
 
 func validationErrors(ctx *fiber.Ctx, err interface{}) bool {
-	exception, ok := err.(validator.ValidationErrors)
+	exception, ok := err.(*ValidationError)
 	if ok {
 		// ctx.Set("Content-Type", "application/json")
 		ctx.Status(fiber.StatusBadRequest)

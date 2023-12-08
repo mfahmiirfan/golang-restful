@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/exception"
 	"mfahmii/golang-restful/helper"
@@ -40,8 +39,6 @@ func (service *AuthServiceImpl) SignUp(ctx *fiber.Ctx, request web.UserSignUpReq
 	})
 
 	err := service.Validate.Struct(request)
-	errs := service.Validate.TranslateError(err)
-	fmt.Println(errs)
 	helper.PanicIfError(err)
 
 	tx := service.DB.Begin()
