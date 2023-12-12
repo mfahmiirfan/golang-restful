@@ -4,7 +4,6 @@ import (
 	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/controller"
 	"mfahmii/golang-restful/helper"
-	"mfahmii/golang-restful/model/domain"
 	"mfahmii/golang-restful/repository"
 	"mfahmii/golang-restful/router"
 	"mfahmii/golang-restful/service"
@@ -13,29 +12,27 @@ import (
 )
 
 func main() {
-	config, err := app.LoadConfig(".")
-	helper.PanicIfError(err)
+	config := app.NewConfig(".")
 	// db := app.NewDB()
-	db := app.OpenConnection(&config)
-	db.AutoMigrate(&domain.User{})
+	db := app.NewDB(config)
 
 	validation := app.NewValidation()
-	validation.AddTranslation("passwordConfirm", "Passwords do not match")
 
 	categoryRepository := repository.NewCategoryRepository()
 	categoryService := service.NewCategoryService(categoryRepository, db, validation)
 	categoryController := controller.NewCategoryController(categoryService)
 
 	userRepository := repository.NewUserRepository()
-	authService := service.NewAuthService(userRepository, db, validation, &config)
+	authService := service.NewAuthService(userRepository, db, validation, config)
 	authController := controller.NewAuthController(authService)
+
 	router := router.NewRouter(categoryController, authController)
 
 	// server := http.Server{
 	// 	Addr:    "localhost:3000",
 	// 	Handler: middleware.NewAuthMiddleware(router),
 	// }
-	err = router.Listen(":3000")
+	err := router.Listen(":3000")
 
 	// err := server.ListenAndServe()
 	helper.PanicIfError(err)

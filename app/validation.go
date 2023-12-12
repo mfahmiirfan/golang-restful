@@ -17,6 +17,7 @@ type Validation struct {
 
 func NewValidation() *Validation {
 	validate := validator.New()
+
 	english := en.New()
 	uni := ut.New(english, english)
 	trans, _ := uni.GetTranslator("en")
@@ -26,14 +27,6 @@ func NewValidation() *Validation {
 		Validate:   validate,
 		Translator: &trans,
 	}
-}
-
-func (validation *Validation) Struct(s interface{}) error {
-	return validation.TranslateError(validation.Validate.Struct(s))
-}
-
-func (validation *Validation) RegisterValidation(s string, f func(validator.FieldLevel) bool) {
-	validation.Validate.RegisterValidation(s, f)
 }
 
 func (validation *Validation) TranslateError(err error) error {
@@ -72,4 +65,12 @@ func (validation *Validation) AddTranslation(tag string, errMessage string) {
 	}
 
 	_ = validation.Validate.RegisterTranslation(tag, *validation.Translator, registerFn, transFn)
+}
+
+func (validation *Validation) Struct(s interface{}) error {
+	return validation.TranslateError(validation.Validate.Struct(s))
+}
+
+func (validation *Validation) RegisterStructValidation(f func(validator.StructLevel), i interface{}) {
+	validation.Validate.RegisterStructValidation(f, i)
 }

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"mfahmii/golang-restful/helper"
 	"time"
 
 	"github.com/spf13/viper"
@@ -20,18 +21,18 @@ type Config struct {
 	ClientOrigin string `mapstructure:"CLIENT_ORIGIN"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
+func NewConfig(path string) *Config {
 	viper.AddConfigPath(path)
 	viper.SetConfigType("env")
 	viper.SetConfigName("app")
 
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
-	}
+	err := viper.ReadInConfig()
+	helper.PanicIfError(err)
 
+	config := new(Config)
 	err = viper.Unmarshal(&config)
-	return
+	helper.PanicIfError(err)
+	return config
 }

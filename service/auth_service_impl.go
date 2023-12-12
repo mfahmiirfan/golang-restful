@@ -34,9 +34,14 @@ func NewAuthService(userRepository repository.UserRepository, DB *gorm.DB, valid
 }
 
 func (service *AuthServiceImpl) SignUp(ctx *fiber.Ctx, request web.UserSignUpRequest) web.UserResponse {
-	service.Validate.RegisterValidation("passwordConfirm", func(fl validator.FieldLevel) bool {
-		return fl.Field().String() == request.Password
-	})
+	service.Validate.RegisterStructValidation(func(sl validator.StructLevel) {
+		request := sl.Current().Interface().(web.UserSignUpRequest)
+
+		if request.PasswordConfirm != request.Password {
+			sl.ReportError(request.PasswordConfirm, "passwordConfirm", "PasswordConfirm", "passwordConfirm", "")
+		}
+	}, web.UserSignUpRequest{})
+	service.Validate.AddTranslation("passwordConfirm", "Passwords do not match")
 
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
