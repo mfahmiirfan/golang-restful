@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/exception"
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/domain"
 	"mfahmii/golang-restful/model/web"
 	"mfahmii/golang-restful/repository"
+	"reflect"
 
 	"gorm.io/gorm"
 )
@@ -19,6 +21,9 @@ type CategoryServiceImpl struct {
 }
 
 func NewCategoryService(categoryRepository repository.CategoryRepository, DB *gorm.DB, validate *app.Validation) CategoryService {
+	fmt.Println(reflect.TypeOf(categoryRepository))
+	fmt.Println(categoryRepository)
+	fmt.Printf("%p\n", categoryRepository)
 	return &CategoryServiceImpl{
 		CategoryRepository: categoryRepository,
 		DB:                 DB,
@@ -27,6 +32,9 @@ func NewCategoryService(categoryRepository repository.CategoryRepository, DB *go
 }
 
 func (service *CategoryServiceImpl) Create(ctx context.Context, request web.CategoryCreateRequest) web.CategoryResponse {
+	fmt.Println(reflect.TypeOf(request))
+	fmt.Println(request)
+	fmt.Printf("%p\n", &request)
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 

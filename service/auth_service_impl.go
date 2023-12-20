@@ -8,7 +8,6 @@ import (
 	"mfahmii/golang-restful/repository"
 	"time"
 
-	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
@@ -21,7 +20,6 @@ type AuthServiceImpl struct {
 	DB             *gorm.DB
 	Validate       *app.Validation
 	Config         *app.Config
-	Trans          *ut.Translator
 }
 
 func NewAuthService(userRepository repository.UserRepository, DB *gorm.DB, validate *app.Validation, config *app.Config) AuthService {

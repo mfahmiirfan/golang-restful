@@ -31,8 +31,8 @@ func NewConfig(path string) *Config {
 	err := viper.ReadInConfig()
 	helper.PanicIfError(err)
 
-	config := new(Config)
+	config := Config{}
 	err = viper.Unmarshal(&config)
 	helper.PanicIfError(err)
-	return config
+	return &config
 }

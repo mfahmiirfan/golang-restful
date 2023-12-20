@@ -12,7 +12,7 @@ import (
 
 type Validation struct {
 	Validate   *validator.Validate
-	Translator *ut.Translator
+	translator *ut.Translator
 }
 
 func NewValidation() *Validation {
@@ -25,11 +25,11 @@ func NewValidation() *Validation {
 
 	return &Validation{
 		Validate:   validate,
-		Translator: &trans,
+		translator: &trans,
 	}
 }
 
-func (validation *Validation) TranslateError(err error) error {
+func (validation *Validation) translateError(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -41,7 +41,7 @@ func (validation *Validation) TranslateError(err error) error {
 
 	var errMsgs []string
 	for _, e := range validatorErrs {
-		translatedErr := e.Translate(*validation.Translator)
+		translatedErr := e.Translate(*validation.translator)
 		errMsgs = append(errMsgs, translatedErr)
 	}
 
@@ -64,11 +64,11 @@ func (validation *Validation) AddTranslation(tag string, errMessage string) {
 		return t
 	}
 
-	_ = validation.Validate.RegisterTranslation(tag, *validation.Translator, registerFn, transFn)
+	_ = validation.Validate.RegisterTranslation(tag, *validation.translator, registerFn, transFn)
 }
 
 func (validation *Validation) Struct(s interface{}) error {
-	return validation.TranslateError(validation.Validate.Struct(s))
+	return validation.translateError(validation.Validate.Struct(s))
 }
 
 func (validation *Validation) RegisterStructValidation(f func(validator.StructLevel), i interface{}) {

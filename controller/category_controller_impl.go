@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"fmt"
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/web"
 	"mfahmii/golang-restful/service"
+	"reflect"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -22,7 +24,9 @@ func NewCategoryController(categoryService service.CategoryService) CategoryCont
 func (controller *CategoryControllerImpl) Create(ctx *fiber.Ctx) error {
 	categoryCreateRequest := web.CategoryCreateRequest{}
 	helper.ReadFromRequestBody(ctx, &categoryCreateRequest)
-
+	fmt.Println(reflect.TypeOf(categoryCreateRequest))
+	fmt.Println(categoryCreateRequest)
+	fmt.Printf("%p\n", &categoryCreateRequest)
 	categoryResponse := controller.CategoryService.Create(ctx.Context(), categoryCreateRequest)
 	webResponse := web.WebResponse{
 		Code:   200,

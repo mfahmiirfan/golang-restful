@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/controller"
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/repository"
 	"mfahmii/golang-restful/router"
 	"mfahmii/golang-restful/service"
+	"reflect"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -19,6 +21,9 @@ func main() {
 	validation := app.NewValidation()
 
 	categoryRepository := repository.NewCategoryRepository()
+	fmt.Println(reflect.TypeOf(categoryRepository))
+	fmt.Println(categoryRepository)
+	fmt.Printf("%p\n", categoryRepository)
 	categoryService := service.NewCategoryService(categoryRepository, db, validation)
 	categoryController := controller.NewCategoryController(categoryService)
 
