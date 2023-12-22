@@ -17,18 +17,23 @@ func NewUserRepository() UserRepository {
 	return &UserRepositoryImpl{}
 }
 
-func (repository *UserRepositoryImpl) Save(ctx context.Context, tx *gorm.DB, user domain.User) domain.User {
+func (repository *UserRepositoryImpl) Save(ctx context.Context, tx *gorm.DB, user domain.User) (domain.User, error) {
 	// SQL := "insert into category(name) values (?)"
 	// result, err := tx.ExecContext(ctx, SQL, category.Name)
-	response := tx.WithContext(ctx).Create(&user)
-	helper.PanicIfError(response.Error)
+	err := tx.WithContext(ctx).Create(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return user, errors.New("Duplicate entriy")
+		}
+		helper.PanicIfError(err)
+	}
 
 	// id, err := result.LastInsertId()
 	// helper.PanicIfError(err)
 
 	// category.Id = int(id)
 	fmt.Println(user.ID)
-	return user
+	return user, nil
 }
 
 func (repository *UserRepositoryImpl) Update(ctx context.Context, tx *gorm.DB, user domain.User) domain.User {
@@ -50,7 +55,7 @@ func (repository *UserRepositoryImpl) Delete(ctx context.Context, tx *gorm.DB, u
 func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *gorm.DB, userId int) (domain.User, error) {
 	// SQL := "select id, name from category where id = ?"
 	// rows, err := tx.QueryContext(ctx, SQL, categoryId)
-	var user domain.User
+	user := domain.User{}
 	err := tx.WithContext(ctx).First(&user, userId).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -72,7 +77,7 @@ func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *gorm.DB,
 }
 
 func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *gorm.DB, email string) (domain.User, error) {
-	var user domain.User
+	user := domain.User{}
 	err := tx.WithContext(ctx).First(&user, "email = ?", email).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -86,7 +91,7 @@ func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *gorm.
 func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *gorm.DB) []domain.User {
 	// SQL := "select id, name from category"
 	// rows, err := tx.QueryContext(ctx, SQL)
-	var categories []domain.User
+	categories := []domain.User{}
 	err := tx.WithContext(ctx).Find(&categories).Error
 	helper.PanicIfError(err)
 	// defer rows.Close()

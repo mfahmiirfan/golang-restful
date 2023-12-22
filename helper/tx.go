@@ -1,6 +1,8 @@
 package helper
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 func CommitOrRollback(tx *gorm.DB) {
 	err := recover()

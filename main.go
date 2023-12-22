@@ -28,10 +28,11 @@ func main() {
 	categoryController := controller.NewCategoryController(categoryService)
 
 	userRepository := repository.NewUserRepository()
+	userService := service.NewUserService(userRepository, db, validation, config)
 	authService := service.NewAuthService(userRepository, db, validation, config)
-	authController := controller.NewAuthController(authService)
+	authController := controller.NewAuthController(authService, config)
 
-	router := router.NewRouter(categoryController, authController)
+	router := router.NewRouter(categoryController, authController, config, userService)
 
 	// server := http.Server{
 	// 	Addr:    "localhost:3000",

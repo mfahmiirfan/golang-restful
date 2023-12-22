@@ -3,27 +3,29 @@ package service
 import (
 	"context"
 	"fmt"
+	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/exception"
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/domain"
 	"mfahmii/golang-restful/model/web"
 	"mfahmii/golang-restful/repository"
 
-	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type UserServiceImpl struct {
 	UserRepository repository.UserRepository
 	DB             *gorm.DB
-	Validate       *validator.Validate
+	Validate       *app.Validation
+	Config         *app.Config
 }
 
-func NewUserService(userRepository repository.UserRepository, DB *gorm.DB, validate *validator.Validate) UserService {
+func NewUserService(userRepository repository.UserRepository, DB *gorm.DB, validate *app.Validation, config *app.Config) UserService {
 	return &UserServiceImpl{
 		UserRepository: userRepository,
 		DB:             DB,
 		Validate:       validate,
+		Config:         config,
 	}
 }
 
@@ -39,7 +41,10 @@ func (service *UserServiceImpl) Create(ctx context.Context, request web.UserCrea
 		Name: request.Name,
 	}
 
-	user = service.UserRepository.Save(ctx, tx, user)
+	user, err = service.UserRepository.Save(ctx, tx, user)
+	if err != nil {
+		panic(err)
+	}
 
 	return helper.ToUserResponse(user)
 }

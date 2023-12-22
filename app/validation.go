@@ -71,6 +71,6 @@ func (validation *Validation) Struct(s interface{}) error {
 	return validation.translateError(validation.Validate.Struct(s))
 }
 
-func (validation *Validation) RegisterStructValidation(f func(validator.StructLevel), i interface{}) {
-	validation.Validate.RegisterStructValidation(f, i)
+func (validation *Validation) RegisterStructValidation(f func(validator.StructLevel), s interface{}) {
+	validation.Validate.RegisterStructValidation(f, s)
 }

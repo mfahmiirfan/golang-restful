@@ -15,7 +15,5 @@ func WriteToResponseBody(ctx *fiber.Ctx, response interface{}) error {
 	ctx.Append("Content-Type", "application/json")
 	// encoder := json.NewEncoder(writer)
 	// err := encoder.Encode(response)
-	err := ctx.JSON(response)
-	PanicIfError(err)
-	return err
+	return ctx.JSON(response)
 }

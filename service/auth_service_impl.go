@@ -1,15 +1,16 @@
 package service
 
 import (
+	"context"
 	"mfahmii/golang-restful/app"
 	"mfahmii/golang-restful/exception"
 	"mfahmii/golang-restful/helper"
+	"mfahmii/golang-restful/model/domain"
 	"mfahmii/golang-restful/model/web"
 	"mfahmii/golang-restful/repository"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -31,7 +32,7 @@ func NewAuthService(userRepository repository.UserRepository, DB *gorm.DB, valid
 	}
 }
 
-func (service *AuthServiceImpl) SignUp(ctx *fiber.Ctx, request web.UserSignUpRequest) web.UserResponse {
+func (service *AuthServiceImpl) SignUp(ctx context.Context, request web.UserSignUpRequest) web.UserResponse {
 	service.Validate.RegisterStructValidation(func(sl validator.StructLevel) {
 		request := sl.Current().Interface().(web.UserSignUpRequest)
 
@@ -44,14 +45,28 @@ func (service *AuthServiceImpl) SignUp(ctx *fiber.Ctx, request web.UserSignUpReq
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+	helper.PanicIfError(err)
+
 	tx := service.DB.Begin()
 	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
 
-	return web.UserResponse{}
+	user := domain.User{
+		Name:     request.Name,
+		Email:    request.Email,
+		Password: string(hashedPassword),
+	}
+
+	user, err = service.UserRepository.Save(ctx, tx, user)
+	if err != nil {
+		panic(err)
+	}
+
+	return helper.ToUserResponse(user)
 }
 
-func (service *AuthServiceImpl) SignIn(ctx *fiber.Ctx, request web.UserSignInRequest) web.TokenResponse {
+func (service *AuthServiceImpl) SignIn(ctx context.Context, request web.UserSignInRequest) web.TokenResponse {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
@@ -59,7 +74,7 @@ func (service *AuthServiceImpl) SignIn(ctx *fiber.Ctx, request web.UserSignInReq
 	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)
 
-	user, err := service.UserRepository.FindByEmail(ctx.Context(), tx, request.Email)
+	user, err := service.UserRepository.FindByEmail(ctx, tx, request.Email)
 	if err != nil {
 		panic(exception.NewLoginError("Invalid email or Password"))
 	}
@@ -81,16 +96,6 @@ func (service *AuthServiceImpl) SignIn(ctx *fiber.Ctx, request web.UserSignInReq
 
 	tokenString, err := tokenByte.SignedString([]byte(service.Config.JwtSecret))
 	helper.PanicIfError(err)
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:     "token",
-		Value:    tokenString,
-		Path:     "/",
-		MaxAge:   service.Config.JwtMaxAge * 60,
-		Secure:   false,
-		HTTPOnly: true,
-		Domain:   "localhost",
-	})
 
 	return web.TokenResponse{
 		Token: tokenString,

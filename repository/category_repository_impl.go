@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"mfahmii/golang-restful/helper"
 	"mfahmii/golang-restful/model/domain"
+	"reflect"
 
 	"gorm.io/gorm"
 )
@@ -50,10 +51,13 @@ func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *gorm.D
 func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *gorm.DB, categoryId int) (domain.Category, error) {
 	// SQL := "select id, name from category where id = ?"
 	// rows, err := tx.QueryContext(ctx, SQL, categoryId)
-	var category domain.Category
+	category := domain.Category{}
 	err := tx.WithContext(ctx).First(&category, categoryId).Error
+	fmt.Println("ini error:")
+	fmt.Println(reflect.TypeOf(err))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Println("masuk error record not found")
 			return category, errors.New("category is not found")
 		}
 		helper.PanicIfError(err)
@@ -74,7 +78,7 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *gorm
 func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *gorm.DB) []domain.Category {
 	// SQL := "select id, name from category"
 	// rows, err := tx.QueryContext(ctx, SQL)
-	var categories []domain.Category
+	categories := []domain.Category{}
 	err := tx.WithContext(ctx).Find(&categories).Error
 	helper.PanicIfError(err)
 	// defer rows.Close()

@@ -28,7 +28,8 @@ func NewDB(config *Config) *gorm.DB {
 
 	dialect := mysql.Open(connectionString)
 	db, err := gorm.Open(dialect, &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger:         logger.Default.LogMode(logger.Info),
+		TranslateError: true,
 	})
 	helper.PanicIfError(err)
 

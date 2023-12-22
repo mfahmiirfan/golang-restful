@@ -13,3 +13,9 @@ func NewValidationError(message string) *ValidationError {
 func (v *ValidationError) Error() string {
 	return v.Message
 }
+
+// func (e *ValidationError) Is(target error) bool {
+// 	// Melakukan pengecekan apakah error merupakan instance dari CustomError
+// 	_, ok := target.(*ValidationError)
+// 	return ok
+// }

@@ -1,12 +1,11 @@
 package service
 
 import (
+	"context"
 	"mfahmii/golang-restful/model/web"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 type AuthService interface {
-	SignUp(ctx *fiber.Ctx, request web.UserSignUpRequest) web.UserResponse
-	SignIn(ctx *fiber.Ctx, request web.UserSignInRequest) web.TokenResponse
+	SignUp(ctx context.Context, request web.UserSignUpRequest) web.UserResponse
+	SignIn(ctx context.Context, request web.UserSignInRequest) web.TokenResponse
 }

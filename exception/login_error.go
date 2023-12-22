@@ -4,8 +4,8 @@ type LoginError struct {
 	Message string
 }
 
-func NewLoginError(message string) LoginError {
-	return LoginError{
+func NewLoginError(message string) *LoginError {
+	return &LoginError{
 		Message: message,
 	}
 }
