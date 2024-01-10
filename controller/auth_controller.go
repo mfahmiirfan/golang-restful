@@ -7,5 +7,5 @@ import (
 type AuthController interface {
 	SignUp(ctx *fiber.Ctx) error
 	SignIn(ctx *fiber.Ctx) error
-	Logout(ctx *fiber.Ctx) error
+	SignOut(ctx *fiber.Ctx) error
 }

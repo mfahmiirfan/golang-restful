@@ -21,8 +21,8 @@ type Config struct {
 	ClientOrigin string `mapstructure:"CLIENT_ORIGIN"`
 }
 
-func NewConfig(path string) *Config {
-	viper.AddConfigPath(path)
+func NewConfig() *Config {
+	viper.AddConfigPath(".")
 	viper.SetConfigType("env")
 	viper.SetConfigName("app")
 

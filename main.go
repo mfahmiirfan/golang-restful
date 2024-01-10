@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	config := app.NewConfig(".")
+	config := app.NewConfig()
 	// db := app.NewDB()
 	db := app.NewDB(config)
 
@@ -29,6 +29,8 @@ func main() {
 
 	userRepository := repository.NewUserRepository()
 	userService := service.NewUserService(userRepository, db, validation, config)
+	var _ = controller.NewUserController(userService)
+
 	authService := service.NewAuthService(userRepository, db, validation, config)
 	authController := controller.NewAuthController(authService, config)
 

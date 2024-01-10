@@ -34,13 +34,13 @@ func (validation *Validation) translateError(err error) error {
 		return nil
 	}
 
-	validatorErrs, ok := err.(validator.ValidationErrors)
+	validationErrs, ok := err.(validator.ValidationErrors)
 	if !ok {
 		return err // Return the original error if it's not of type ValidationErrors
 	}
 
 	var errMsgs []string
-	for _, e := range validatorErrs {
+	for _, e := range validationErrs {
 		translatedErr := e.Translate(*validation.translator)
 		errMsgs = append(errMsgs, translatedErr)
 	}

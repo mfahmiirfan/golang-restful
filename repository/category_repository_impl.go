@@ -21,8 +21,8 @@ func NewCategoryRepository() CategoryRepository {
 func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *gorm.DB, category domain.Category) domain.Category {
 	// SQL := "insert into category(name) values (?)"
 	// result, err := tx.ExecContext(ctx, SQL, category.Name)
-	response := tx.WithContext(ctx).Create(&category)
-	helper.PanicIfError(response.Error)
+	err := tx.WithContext(ctx).Create(&category).Error
+	helper.PanicIfError(err)
 
 	// id, err := result.LastInsertId()
 	// helper.PanicIfError(err)
@@ -60,7 +60,7 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *gorm
 			fmt.Println("masuk error record not found")
 			return category, errors.New("category is not found")
 		}
-		helper.PanicIfError(err)
+		panic(err)
 	}
 	// defer rows.Close()
 
