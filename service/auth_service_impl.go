@@ -56,6 +56,7 @@ func (service *AuthServiceImpl) SignUp(ctx context.Context, request web.UserSign
 		Name:     request.Name,
 		Email:    request.Email,
 		Password: string(hashedPassword),
+		Role:     &request.Role,
 	}
 
 	user, err = service.UserRepository.Save(ctx, tx, user)
@@ -90,7 +91,7 @@ func (service *AuthServiceImpl) SignIn(ctx context.Context, request web.UserSign
 	claims := tokenByte.Claims.(jwt.MapClaims)
 
 	claims["sub"] = user.ID
-	claims["role"] = "test"
+	claims["role"] = user.Role
 	claims["exp"] = now.Add(service.Config.JwtExpiresIn).Unix()
 	claims["iat"] = now.Unix()
 	claims["nbf"] = now.Unix()

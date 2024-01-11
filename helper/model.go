@@ -13,10 +13,11 @@ func ToCategoryResponse(category domain.Category) web.CategoryResponse {
 }
 func ToUserResponse(user domain.User) web.UserResponse {
 	return web.UserResponse{
-		ID:    *user.ID,
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  *user.Role,
+		ID:       *user.ID,
+		Name:     user.Name,
+		Email:    user.Email,
+		Role:     *user.Role,
+		Verified: *user.Verified,
 	}
 }
 

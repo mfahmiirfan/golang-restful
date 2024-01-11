@@ -52,10 +52,13 @@ func AuthHandler(config *app.Config, userService service.UserService) fiber.Hand
 
 		// id, err := strconv.Atoi(claims["sub"])
 		// helper.PanicIfError(err)
+		executedOnce := false
 
 		defer func() {
+			fmt.Println("masuk defer")
 			if r := recover(); r != nil {
-				if _, ok := r.(exception.NotFoundError); ok {
+				fmt.Println("masuk recover")
+				if _, ok := r.(exception.NotFoundError); ok && !executedOnce {
 					panic(exception.NewUnauthorizeError("the user belonging to this token no longer exists"))
 				}
 				fmt.Println(reflect.TypeOf(r))
@@ -63,7 +66,10 @@ func AuthHandler(config *app.Config, userService service.UserService) fiber.Hand
 			}
 		}()
 		fmt.Println("masuk pak eko")
+
 		userResponse := userService.FindById(c.Context(), int(claims["sub"].(float64)))
+		fmt.Println("coba di tes")
+		executedOnce = true
 
 		if checkPermission(claims["role"].(string), c.Path(), c.Method()) {
 			c.Locals("user", userResponse)
@@ -80,13 +86,18 @@ func AuthHandler(config *app.Config, userService service.UserService) fiber.Hand
 }
 
 func checkPermission(role, endpoint, method string) bool {
-	// Lakukan logika untuk memeriksa izin berdasarkan peran pengguna
-	// Anda dapat menggunakan peta (map) atau logika lainnya untuk menentukan izin
-	// Berdasarkan peran, endpoint, dan metode yang diminta.
-	// Contoh sederhana:
-	fmt.Println(endpoint)
-	if strings.HasPrefix(endpoint, "/api/categories") && role != "admin" {
-		return false
+	fmt.Println(role)
+	if strings.HasPrefix(endpoint, "/api/categories") && role == "admin" {
+		return true
 	}
-	return true
+
+	if strings.HasPrefix(endpoint, "/api/users") && role == "admin" {
+		return true
+	}
+
+	if strings.HasPrefix(endpoint, "/api/auth/signout") {
+		return true
+	}
+
+	return false
 }
