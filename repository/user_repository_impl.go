@@ -43,6 +43,7 @@ func (repository *UserRepositoryImpl) Delete(ctx context.Context, tx *gorm.DB, u
 }
 
 func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *gorm.DB, userId int) (domain.User, error) {
+	fmt.Println(userId)
 	user := domain.User{}
 	err := tx.WithContext(ctx).First(&user, userId).Error
 	if err != nil {

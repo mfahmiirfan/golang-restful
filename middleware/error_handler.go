@@ -39,6 +39,12 @@ func ErrorHandler(ctx *fiber.Ctx) error {
 			if loginError(ctx, r) {
 				return
 			}
+			if unauthorizeError(ctx, r) {
+				return
+			}
+			if forbiddenError(ctx, r) {
+				return
+			}
 			fmt.Println("keluar dari if loginError")
 			internalServerError(ctx, r)
 			return
@@ -50,7 +56,7 @@ func ErrorHandler(ctx *fiber.Ctx) error {
 }
 
 func validationErrors(ctx *fiber.Ctx, err interface{}) bool {
-	exception, ok := err.(exception.ValidationError)
+	exception, ok := err.(*exception.ValidationError)
 	if ok {
 		// ctx.Set("Content-Type", "application/json")
 		ctx.Status(fiber.StatusBadRequest)
@@ -125,6 +131,44 @@ func loginError(ctx *fiber.Ctx, err interface{}) bool {
 		webResponse := web.WebResponseError{
 			Code:   fiber.StatusUnauthorized,
 			Status: "UNAUTHORIZED",
+			Errors: exception.Error(),
+		}
+
+		var _ = helper.WriteToResponseBody(ctx, webResponse)
+		return true
+	} else {
+		return false
+	}
+}
+
+func unauthorizeError(ctx *fiber.Ctx, err interface{}) bool {
+	exception, ok := err.(*exception.UnauthorizeError)
+	if ok {
+		// ctx.Set("Content-Type", "application/json")
+		ctx.Status(fiber.StatusUnauthorized)
+
+		webResponse := web.WebResponseError{
+			Code:   fiber.StatusUnauthorized,
+			Status: "UNAUTHORIZED",
+			Errors: exception.Error(),
+		}
+
+		var _ = helper.WriteToResponseBody(ctx, webResponse)
+		return true
+	} else {
+		return false
+	}
+}
+
+func forbiddenError(ctx *fiber.Ctx, err interface{}) bool {
+	exception, ok := err.(*exception.ForbiddenError)
+	if ok {
+		// ctx.Set("Content-Type", "application/json")
+		ctx.Status(fiber.StatusForbidden)
+
+		webResponse := web.WebResponseError{
+			Code:   fiber.StatusForbidden,
+			Status: "FORBIDDEN",
 			Errors: exception.Error(),
 		}
 

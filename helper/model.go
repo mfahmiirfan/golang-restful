@@ -16,6 +16,7 @@ func ToUserResponse(user domain.User) web.UserResponse {
 		ID:    *user.ID,
 		Name:  user.Name,
 		Email: user.Email,
+		Role:  *user.Role,
 	}
 }
 

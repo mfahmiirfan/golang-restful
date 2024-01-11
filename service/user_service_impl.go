@@ -83,6 +83,7 @@ func (service *UserServiceImpl) Delete(ctx context.Context, userId int) {
 }
 
 func (service *UserServiceImpl) FindById(ctx context.Context, userId int) web.UserResponse {
+	fmt.Println(userId)
 	tx := service.DB.Begin()
 	helper.PanicIfError(tx.Error)
 	defer helper.CommitOrRollback(tx)

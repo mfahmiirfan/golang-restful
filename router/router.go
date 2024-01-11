@@ -13,7 +13,8 @@ func NewRouter(categoryController controller.CategoryController, authController 
 	// router := httprouter.New()
 	router := fiber.New()
 
-	router.Use(middleware.ErrorHandler)
+	// router.Use(middleware.ErrorHandler)
+	router.Use(middleware.ErrorHandler, middleware.AuthHandler(config, userService))
 
 	router.Get("/api/categories", categoryController.FindAll)
 	router.Get("/api/categories/:categoryId" /*, middleware.AuthHandler(config, userService)*/, categoryController.FindById)

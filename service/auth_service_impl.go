@@ -90,6 +90,7 @@ func (service *AuthServiceImpl) SignIn(ctx context.Context, request web.UserSign
 	claims := tokenByte.Claims.(jwt.MapClaims)
 
 	claims["sub"] = user.ID
+	claims["role"] = "test"
 	claims["exp"] = now.Add(service.Config.JwtExpiresIn).Unix()
 	claims["iat"] = now.Unix()
 	claims["nbf"] = now.Unix()
